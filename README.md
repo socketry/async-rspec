@@ -4,6 +4,10 @@ Provides useful `RSpec.shared_context`s for testing code that builds on top of [
 
 [async]: https://github.com/socketry/async
 
+[![Build Status](https://secure.travis-ci.org/socketry/async-rspec.svg)](http://travis-ci.org/socketry/async-rspec)
+[![Code Climate](https://codeclimate.com/github/socketry/async-rspec.svg)](https://codeclimate.com/github/socketry/async-rspec)
+[![Coverage Status](https://coveralls.io/repos/socketry/async-rspec/badge.svg)](https://coveralls.io/r/socketry/async-rspec)
+
 ## Installation
 
 Add this line to your application's Gemfile:
