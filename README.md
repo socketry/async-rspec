@@ -45,7 +45,7 @@ Many specs need to run within a reactor. A shared context is provided which incl
 RSpec.describe IO do
 	include_context Async::RSpec::Reactor
 	
-  let(:pipe) {IO.pipe}
+	let(:pipe) {IO.pipe}
 	let(:input) {pipe.last}
 	let(:output) {pipe.first}
 	

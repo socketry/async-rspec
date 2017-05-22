@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-RSpec.describe "leaky ios" do
+RSpec.describe "reactor context" do
 	include_context Async::RSpec::Reactor
 	
 	# The following fails:
