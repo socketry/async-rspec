@@ -41,6 +41,8 @@ RSpec.describe "leaky ios" do
 end
 ```
 
+In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible to just writing `IO.pipe` will not leak, as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not correctly close IOs, so don't depend on this behaviour.
+
 ### Reactor
 
 Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks.
