@@ -31,7 +31,7 @@ module Async
 				
 				after(:each) do |example|
 					unless profile.threads.empty?
-						profile.eliminate_methods!([/RSpec::/])
+						# profile.eliminate_methods!([/RSpec::/])
 						
 						printer = RubyProf::FlatPrinter.new(profile)
 						printer.print(STDOUT)
