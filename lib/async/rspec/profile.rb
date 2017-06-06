@@ -20,6 +20,30 @@
 
 module Async
 	module RSpec
-		VERSION = "1.1.0"
+		module Profile
+		end
+		
+		begin
+			require 'ruby-prof'
+			
+			RSpec.shared_context Profile do
+				let(:profile) {RubyProf::Profile.new(merge_fibers: true)}
+				
+				after(:each) do |example|
+					unless profile.threads.empty?
+						profile.eliminate_methods!([/RSpec::/])
+						
+						printer = RubyProf::FlatPrinter.new(profile)
+						printer.print(STDOUT)
+					end
+				end
+			end
+		rescue LoadError
+			RSpec.shared_context Profile do
+				before(:all) do
+					puts "Profiling not enabled/supported."
+				end
+			end
+		end
 	end
 end

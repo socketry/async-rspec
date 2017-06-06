@@ -18,8 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-module Async
-	module RSpec
-		VERSION = "1.1.0"
+require 'async/rspec/profile'
+
+RSpec.describe "leaks context" do
+	include_context Async::RSpec::Profile
+	
+	# The following fails:
+	it "profiles the function" do
+		profile.start
+		profile.stop
 	end
 end
