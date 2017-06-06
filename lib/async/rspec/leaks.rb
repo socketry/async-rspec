@@ -22,7 +22,7 @@ module Async
 	module RSpec
 		module Leaks
 			def current_ios(gc: GC.start)
-				all_ios = ObjectSpace.each_object(IO).to_a.sort_by(&:object_id)
+				all_ios = ObjectSpace.each_object(::IO).to_a.sort_by(&:object_id)
 				
 				# We are not interested in ios that have been closed already:
 				return all_ios.reject{|io| io.closed?}
