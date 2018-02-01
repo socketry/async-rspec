@@ -1,4 +1,4 @@
-# Copyright, 2017, by Samuel G. D. Williams. <http://www.codeotaku.com>
+# Copyright, 2018, by Samuel G. D. Williams. <http://www.codeotaku.com>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,8 +18,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-module Async
-	module RSpec
-		VERSION = "1.2.0"
+require 'async/rspec/ssl'
+
+RSpec.describe Async::RSpec::SSL do
+	context Async::RSpec::SSL::CertificateAuthority do
+		include_context Async::RSpec::SSL::CertificateAuthority
+		
+		it "has a valid certificate authority" do
+			expect(certificate_authority.verify(certificate_authority_key)).to be_truthy
+		end
+	end
+	
+	context Async::RSpec::SSL::ValidCertificate do
+		include_context Async::RSpec::SSL::ValidCertificate
+		
+		it "can validate client certificate" do
+			expect(certificate_store.verify(certificate)).to be_truthy
+		end
+	end
+
+	context Async::RSpec::SSL::InvalidCertificate do
+		include_context Async::RSpec::SSL::InvalidCertificate
+		
+		it "fails to validate certificate" do
+			expect(certificate_store.verify(certificate)).to be_falsey
+		end
 	end
 end
