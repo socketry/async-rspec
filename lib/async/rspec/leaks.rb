@@ -32,13 +32,11 @@ module Async
 		RSpec.shared_context Leaks do
 			include Leaks
 			
-			let(:before_ios) {current_ios}
+			let!(:before_ios) {current_ios}
 			let(:after_ios) {current_ios}
 			
 			# We use around(:each) because it's the highest priority.
 			around(:each) do |example|
-				before_ios
-				
 				example.run.tap do
 					expect(after_ios).to be == before_ios
 				end
