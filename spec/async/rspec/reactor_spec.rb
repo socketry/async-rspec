@@ -25,4 +25,14 @@ RSpec.describe "reactor context" do
 	it "has reactor" do
 		expect(reactor).to be_kind_of Async::Reactor
 	end
+	
+	context "with short timeout", timeout: 1 do
+		it "times out", pending: "it should fail" do
+			reactor.async do |task|
+				expect{
+					task.sleep(100)
+				}.to raise_error(Async::Stop)
+			end
+		end
+	end
 end

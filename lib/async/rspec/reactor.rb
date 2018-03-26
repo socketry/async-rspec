@@ -23,31 +23,32 @@ require 'async/reactor'
 
 module Async
 	module RSpec
-		class Reactor
-			def self.current_ios(gc: GC.start)
-				all_ios = ObjectSpace.each_object(IO).to_a.sort_by(&:object_id)
-				
-				# We are not interested in ios that have been closed already:
-				return all_ios.reject{|io| io.closed?}
-			end
-		end
-		
-		RSpec.shared_context Reactor do
-			let(:reactor) {Async::Task.current.reactor}
-			
-			include_context Async::RSpec::Leaks
-			
-			def run_reactor(example)
+		module Reactor
+			def run_reactor(example, duration = nil)
 				result = nil
 				
+				duration ||= example.metadata[:timeout] || 60
+				
 				Async::Reactor.run do |task|
-					result = example.run
+					task.timeout(duration) do
+						result = example.run
+						
+						task.children.each(&:wait)
+					end
 					
 					task.reactor.stop if result.is_a? Exception
 				end
 				
 				return result
 			end
+		end
+		
+		RSpec.shared_context Reactor do
+			include Reactor
+			
+			let(:reactor) {Async::Task.current.reactor}
+			
+			include_context Async::RSpec::Leaks
 			
 			around(:each) do |example|
 				run_reactor(example)
