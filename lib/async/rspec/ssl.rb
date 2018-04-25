@@ -34,6 +34,9 @@ module Async
 			
 			module VerifiedContexts
 			end
+			
+			module HostCertificates
+			end
 		end
 		
 		RSpec.shared_context SSL::CertificateAuthority do
@@ -57,7 +60,7 @@ module Async
 				certificate.not_before = Time.now
 				certificate.not_after = Time.now + 3600
 				
-				extension_factory = OpenSSL::X509::ExtensionFactory.new()
+				extension_factory = OpenSSL::X509::ExtensionFactory.new
 				extension_factory.subject_certificate = certificate
 				extension_factory.issuer_certificate = certificate
 				certificate.add_extension extension_factory.create_extension("basicConstraints", "CA:TRUE", true)
@@ -104,6 +107,69 @@ module Async
 				certificate.add_extension extension_factory.create_extension("subjectKeyIdentifier", "hash")
 				
 				certificate.sign certificate_authority_key, OpenSSL::Digest::SHA256.new
+			end
+		end
+		
+		RSpec.shared_context SSL::HostCertificates do
+			include_context SSL::CertificateAuthority
+			
+			let(:keys) do
+				Hash[
+					hosts.collect{|name| [name, OpenSSL::PKey::RSA.new(1024)]}
+				]
+			end
+			
+			# The certificate used for actual communication:
+			let(:certificates) do
+				Hash[
+					hosts.collect do |name|
+						certificate_name = OpenSSL::X509::Name.parse("O=Test/CN=#{name}")
+						
+						certificate = OpenSSL::X509::Certificate.new
+						certificate.subject = certificate_name
+						certificate.issuer = certificate_authority.subject
+						
+						certificate.public_key = keys[name].public_key
+						
+						certificate.serial = 2
+						certificate.version = 2
+						
+						certificate.not_before = Time.now
+						certificate.not_after = Time.now + 3600
+						
+						extension_factory = OpenSSL::X509::ExtensionFactory.new
+						extension_factory.subject_certificate = certificate
+						extension_factory.issuer_certificate = certificate_authority
+						certificate.add_extension extension_factory.create_extension("keyUsage", "digitalSignature", true)
+						certificate.add_extension extension_factory.create_extension("subjectKeyIdentifier", "hash")
+						
+						certificate.sign certificate_authority_key, OpenSSL::Digest::SHA256.new
+						
+						[name, certificate]
+					end
+				]
+			end
+			
+			let(:server_context) do
+				OpenSSL::SSL::SSLContext.new.tap do |context|
+					context.servername_cb = Proc.new do |socket, name|
+						if hosts.include? name
+							socket.hostname = name
+							
+							OpenSSL::SSL::SSLContext.new.tap do |context|
+								context.cert = certificates[name]
+								context.key = keys[name]
+							end
+						end
+					end
+				end
+			end
+			
+			let(:client_context) do
+				OpenSSL::SSL::SSLContext.new.tap do |context|
+					context.cert_store = certificate_store
+					context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+				end
 			end
 		end
 		
