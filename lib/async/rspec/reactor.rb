@@ -30,7 +30,7 @@ module Async
 				duration ||= example.metadata.fetch(:timeout, 60)
 				
 				Async::Reactor.run do |task|
-					task.annotate("example coordinator")
+					task.annotate(self.class)
 					
 					reactor = task.reactor
 					timer = nil
@@ -54,9 +54,11 @@ module Async
 						
 						result = example.run
 						
-						reactor.stop if result.is_a? Exception
-						
-						spec_task.children.each(&:wait)
+						if result.is_a? Exception
+							reactor.stop
+						else
+							spec_task.children.each(&:wait)
+						end
 					end.wait
 					
 					timer.stop if timer
