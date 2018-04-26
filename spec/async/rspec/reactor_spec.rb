@@ -27,12 +27,20 @@ RSpec.describe "reactor context" do
 	end
 	
 	context "with short timeout", timeout: 1 do
-		it "times out", pending: "it should fail" do
+		it "doesn't time out" do
+			reactor.async do |task|
+				expect{
+					task.sleep(0.1)
+				}.to_not raise_error
+			end.wait
+		end
+		
+		it "times out", pending: 'it should fail' do
 			reactor.async do |task|
 				expect{
 					task.sleep(100)
 				}.to raise_error(Async::Stop)
-			end
+			end.wait
 		end
 	end
 end

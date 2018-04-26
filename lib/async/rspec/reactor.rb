@@ -27,16 +27,39 @@ module Async
 			def run_reactor(example, duration = nil)
 				result = nil
 				
-				duration ||= example.metadata[:timeout] || 60
+				duration ||= example.metadata.fetch(:timeout, 60)
 				
 				Async::Reactor.run do |task|
-					task.timeout(duration) do
-						result = example.run
-						
-						task.children.each(&:wait)
+					task.annotate("example coordinator")
+					
+					reactor = task.reactor
+					timer = nil
+					
+					if duration
+						timer = reactor.async do |task|
+							task.annotate("timer task duration=#{duration}")
+							task.sleep(duration)
+							
+							buffer = StringIO.new
+							reactor.print_hierarchy(buffer)
+							
+							reactor.stop
+							
+							raise TimeoutError, "run time exceeded duration #{duration}s:\r\n#{buffer.string}"
+						end
 					end
 					
-					task.reactor.stop if result.is_a? Exception
+					task.async do |spec_task|
+						spec_task.annotate("example runner")
+						
+						result = example.run
+						
+						reactor.stop if result.is_a? Exception
+						
+						spec_task.children.each(&:wait)
+					end.wait
+					
+					timer.stop if timer
 				end
 				
 				return result
