@@ -19,17 +19,17 @@
 # THE SOFTWARE.
 
 require_relative 'leaks'
+
 require 'async/reactor'
+require 'async/debug/selector'
 
 module Async
 	module RSpec
 		module Reactor
-			def run_reactor(example, duration = nil)
+			def run_example(reactor, example, duration)
 				result = nil
 				
-				duration ||= example.metadata.fetch(:timeout, 60)
-				
-				Async::Reactor.run do |task|
+				reactor.run do |task|
 					task.annotate(self.class)
 					
 					reactor = task.reactor
@@ -71,12 +71,18 @@ module Async
 		RSpec.shared_context Reactor do
 			include Reactor
 			
-			let(:reactor) {Async::Task.current.reactor}
+			let(:reactor) {Async::Reactor.new(selector: Async::Debug::Selector.new)}
 			
 			include_context Async::RSpec::Leaks
 			
 			around(:each) do |example|
-				run_reactor(example)
+				duration = example.metadata.fetch(:timeout, 60)
+				
+				begin
+					run_example(reactor, example, duration)
+				ensure
+					reactor.close
+				end
 			end
 		end
 	end

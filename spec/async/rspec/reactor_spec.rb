@@ -26,6 +26,21 @@ RSpec.describe "reactor context" do
 		expect(reactor).to be_kind_of Async::Reactor
 	end
 	
+	context "debug selector" do
+		it "should fail if registering the same io twice" do
+			input, output = IO.pipe
+			
+			reactor.register(input, :r)
+			
+			expect do
+				reactor.register(input, :r)
+			end.to raise_error(RuntimeError, /already registered/)
+			
+			input.close
+			output.close
+		end
+	end
+	
 	context "with short timeout", timeout: 1 do
 		it "doesn't time out" do
 			reactor.async do |task|
