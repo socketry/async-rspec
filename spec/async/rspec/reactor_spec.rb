@@ -30,13 +30,13 @@ RSpec.describe "reactor context" do
 		it "should fail if registering the same io twice" do
 			input, output = IO.pipe
 			
-			reactor.register(input, :r)
+			monitor = reactor.register(input, :r)
 			
 			expect do
 				reactor.register(input, :r)
 			end.to raise_error(RuntimeError, /already registered/)
 			
-			input.close
+			monitor.close
 			output.close
 		end
 	end
