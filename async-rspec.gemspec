@@ -20,7 +20,6 @@ Gem::Specification.new do |spec|
 	
 	# Since we test the shared contexts, we need some bits of async:
 	spec.add_development_dependency "async", "~> 1.8"
-	spec.add_development_dependency "ruby-prof"
 	
 	spec.add_development_dependency "bundler", "~> 1.13"
 	spec.add_development_dependency "rake", "~> 10.0"
