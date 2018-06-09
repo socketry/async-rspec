@@ -112,8 +112,8 @@ module Async
 				def matches?(given_proc)
 					return true unless trace = Trace.capture(&given_proc)
 					
-					@allocations.each do |klass, maximum|
-						if allocation = trace.allocated[klass] and allocation.count > maximum
+					@allocations.each do |klass, acceptable|
+						if allocation = trace.allocated[klass] and acceptable === allocation.count
 							@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass} (limit #{maximum})"
 						end
 					end

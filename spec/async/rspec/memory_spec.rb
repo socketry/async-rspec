@@ -35,4 +35,10 @@ RSpec.describe "memory context" do
 			2.times{String.new}
 		end.to limit_allocations(String => 4)
 	end
+	
+	it "should be within specified range" do
+		expect do
+			2.times{String.new}
+		end.to limit_allocations(String => 1..3)
+	end
 end
