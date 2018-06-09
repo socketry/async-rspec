@@ -32,9 +32,21 @@ module Async
 			end
 			
 			class Trace
-				def self.capture(&block)
-					self.new.tap do |trace|
-						trace.capture(&block)
+				def self.supported_platform?
+					ObjectSpace.respond_to? :trace_object_allocations
+				end
+				
+				if supported_platform?
+					def self.capture(&block)
+						self.new.tap do |trace|
+							trace.capture(&block)
+						end
+					end
+				else
+					def self.capture(&block)
+						yield
+						
+						return nil
 					end
 				end
 				
@@ -98,7 +110,7 @@ module Async
 				end
 				
 				def matches?(given_proc)
-					trace = Trace.capture(&given_proc)
+					return true unless trace = Trace.capture(&given_proc)
 					
 					@allocations.each do |klass, maximum|
 						if allocation = trace.allocated[klass] and allocation.count > maximum
