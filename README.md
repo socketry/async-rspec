@@ -68,6 +68,7 @@ RSpec.describe IO do
 		
 		output_task.wait
 		expect(message).to be == "Hello World"
+	end
 end
 ```
 
