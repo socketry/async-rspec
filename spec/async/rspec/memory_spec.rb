@@ -21,11 +21,13 @@
 RSpec.describe "memory context" do
 	include_context Async::RSpec::Memory
 	
-	# The following fails:
-	it "should exceed specified limit", pending: 'it should fail' do
-		expect do
-			6.times{String.new}
-		end.to limit_allocations(String => 4)
+	if Async::RSpec::Memory::Trace.supported?
+		# The following fails:
+		it "should exceed specified limit", pending: 'it should fail' do
+			expect do
+				6.times{String.new}
+			end.to limit_allocations(String => 4)
+		end
 	end
 	
 	it "should not exceed specified limit" do

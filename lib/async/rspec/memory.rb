@@ -32,11 +32,11 @@ module Async
 			end
 			
 			class Trace
-				def self.supported_platform?
+				def self.supported?
 					ObjectSpace.respond_to? :trace_object_allocations
 				end
 				
-				if supported_platform?
+				if supported?
 					def self.capture(&block)
 						self.new.tap do |trace|
 							trace.capture(&block)

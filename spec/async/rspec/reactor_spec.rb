@@ -37,6 +37,7 @@ RSpec.describe "reactor context" do
 			end.to raise_error(RuntimeError, /already registered/)
 			
 			monitor.close
+			input.close
 			output.close
 		end
 	end
