@@ -113,8 +113,17 @@ module Async
 					return true unless trace = Trace.capture(&given_proc)
 					
 					@allocations.each do |klass, acceptable|
-						if allocation = trace.allocated[klass] and acceptable === allocation.count
-							@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, not within acceptable limit: #{acceptable}"
+						next unless allocation = allocation = trace.allocated[klass] 
+						
+						case acceptable
+						when Range
+							unless acceptable.include? allocation.count
+								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected within #{acceptable}"
+							end
+						when Integer
+							if allocation.count > acceptable
+								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected at most #{acceptable}"
+							end
 						end
 					end
 					
