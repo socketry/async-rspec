@@ -27,11 +27,15 @@ module Async
 			require 'ruby-prof'
 			
 			RSpec.shared_context Profile do
-				let(:profile) {RubyProf::Profile.new(merge_fibers: true)}
-				
-				after(:each) do |example|
-					unless profile.threads.empty?
-						# profile.eliminate_methods!([/RSpec::/])
+				around(:each) do |example|
+					profile = RubyProf::Profile.new(merge_fibers: true)
+					
+					begin
+						profile.start
+						
+						example.run
+					ensure
+						profile.stop
 						
 						printer = RubyProf::FlatPrinter.new(profile)
 						printer.print(STDOUT)
@@ -41,7 +45,7 @@ module Async
 		rescue LoadError
 			RSpec.shared_context Profile do
 				before(:all) do
-					puts "Profiling not enabled/supported."
+					warn "Profiling not enabled/supported."
 				end
 			end
 		end

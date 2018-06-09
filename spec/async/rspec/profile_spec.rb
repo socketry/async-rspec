@@ -24,7 +24,6 @@ RSpec.describe "leaks context" do
 	include_context Async::RSpec::Profile
 	
 	it "profiles the function" do
-		profile.start
-		profile.stop
+		sleep 0
 	end
 end
