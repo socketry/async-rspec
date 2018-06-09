@@ -114,7 +114,7 @@ module Async
 					
 					@allocations.each do |klass, acceptable|
 						if allocation = trace.allocated[klass] and acceptable === allocation.count
-							@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass} (limit #{maximum})"
+							@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, not within acceptable limit: #{acceptable}"
 						end
 					end
 					
