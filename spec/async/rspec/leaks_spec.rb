@@ -21,7 +21,6 @@
 RSpec.describe "leaks context" do
 	include_context Async::RSpec::Leaks
 	
-	# The following fails:
 	it "leaks io" do
 		expect(before_ios).to be == current_ios
 		

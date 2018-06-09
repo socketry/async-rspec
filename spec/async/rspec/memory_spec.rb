@@ -18,13 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'async/rspec/profile'
-
-RSpec.describe "leaks context" do
-	include_context Async::RSpec::Profile
+RSpec.describe "memory context" do
+	include_context Async::RSpec::Memory
 	
-	it "profiles the function" do
-		profile.start
-		profile.stop
+	# The following fails:
+	it "should exceed specified limit", pending: 'it should fail' do
+		expect do
+			6.times{String.new}
+		end.to limit_allocations(String => 4)
+	end
+	
+	it "should not exceed specified limit" do
+		expect do
+			2.times{String.new}
+		end.to limit_allocations(String => 4)
 	end
 end

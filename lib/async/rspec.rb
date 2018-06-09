@@ -20,3 +20,4 @@
 
 require_relative "rspec/version"
 require_relative "rspec/reactor"
+require_relative "rspec/memory"
