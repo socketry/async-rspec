@@ -100,8 +100,9 @@ module Async
 			class LimitAllocations
 				include ::RSpec::Matchers::Composable
 				
-				def initialize(allocations)
+				def initialize(size: nil, **allocations)
 					@allocations = allocations
+          @size = size
 					@errors = []
 				end
 				
@@ -125,6 +126,12 @@ module Async
 								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected at most #{acceptable}"
 							end
 						end
+					end
+					
+          total_allocated = trace.allocated.values.map(&:size).inject(0, :+)
+					
+					if @size && total_allocated > @size
+						@errors << "allocated #{total_allocated} bytes in total, expected within #{@size} bytes"
 					end
 					
 					return @errors.empty?

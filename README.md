@@ -43,6 +43,28 @@ end
 
 In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible to just writing `IO.pipe` will not leak, as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not correctly close IOs, so don't depend on this behaviour.
 
+### Allocations
+
+Allocating large amounts of objects can lead to memery problems. `Async::RSpec::Memory` adds a `limit_allocations` matcher, which tracks the number of allocations and memory size for each object type and allows you to specify expected limits.
+
+```ruby
+RSpec.describe "memory allocations" do
+	include_context Async::RSpec::Memory
+	
+	it "limits allocation counts" do
+		expect do
+			6.times{String.new}
+		end.to limit_allocations(String => 10) # 10 strings can be allocated
+	end
+
+	it "limits allocation size" do
+		expect do
+			6.times{String.new("foo")}
+		end.to limit_allocations(size: 1024) # 1KB can be allocated
+	end
+end
+```
+
 ### Reactor
 
 Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks.
