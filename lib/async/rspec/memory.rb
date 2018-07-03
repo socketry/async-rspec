@@ -100,9 +100,8 @@ module Async
 			class LimitAllocations
 				include ::RSpec::Matchers::Composable
 				
-				def initialize(size: nil, **allocations)
+				def initialize(allocations)
 					@allocations = allocations
-          @size = size
 					@errors = []
 				end
 				
@@ -114,24 +113,27 @@ module Async
 					return true unless trace = Trace.capture(&given_proc)
 					
 					@allocations.each do |klass, acceptable|
-						next unless allocation = allocation = trace.allocated[klass] 
+						next unless allocation = trace.allocated[klass]
 						
-						case acceptable
+						acceptable = { count: acceptable } unless acceptable.is_a?(Hash)
+						
+						case acceptable[:count]
 						when Range
-							unless acceptable.include? allocation.count
-								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected within #{acceptable}"
+							unless acceptable[:count].include? allocation.count
+								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected within #{acceptable[:count]}"
 							end
 						when Integer
-							if allocation.count > acceptable
-								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected at most #{acceptable}"
+							if allocation.count > acceptable[:count]
+								@errors << "allocated #{allocation.count} instances (#{allocation.size} bytes) of #{klass}, expected at most #{acceptable[:count]}"
 							end
 						end
-					end
-					
-          total_allocated = trace.allocated.values.map(&:size).inject(0, :+)
-					
-					if @size && total_allocated > @size
-						@errors << "allocated #{total_allocated} bytes in total, expected within #{@size} bytes"
+						
+						case acceptable[:size]
+						when Integer
+							if allocation.size > acceptable[:size]
+								@errors << "allocated #{allocation.size} bytes (#{allocation.count} objects) of #{klass}, expected at most #{acceptable[:size]}"
+							end
+						end
 					end
 					
 					return @errors.empty?
