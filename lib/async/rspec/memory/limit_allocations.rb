@@ -87,7 +87,7 @@ module Async
 						end
 						
 						check(allocation.size, acceptable[:size]) do |expected|
-							@errors << "allocated #{allocation.count} #{klass} instances, #{allocation.size} bytes, #{expected} instances"
+							@errors << "allocated #{allocation.count} #{klass} instances, #{allocation.size} bytes, #{expected} bytes"
 						end
 					end
 					
