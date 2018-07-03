@@ -56,11 +56,17 @@ RSpec.describe "memory allocations" do
 			6.times{String.new}
 		end.to limit_allocations(String => 10) # 10 strings can be allocated
 	end
-
+	
+	it "limits allocation counts (hash)" do
+		expect do
+			6.times{String.new}
+		end.to limit_allocations(String => { count: 10 }) # 10 strings can be allocated
+	end
+	
 	it "limits allocation size" do
 		expect do
 			6.times{String.new("foo")}
-		end.to limit_allocations(size: 1024) # 1KB can be allocated
+		end.to limit_allocations(String => { size: 1024 }) # 1 KB of strings can be allocated
 	end
 end
 ```
