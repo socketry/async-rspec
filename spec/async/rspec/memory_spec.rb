@@ -37,7 +37,7 @@ RSpec.describe "memory context" do
 		
 		expect do
 			2.times{String.new}
-		end.to limit_allocations(String => { count: 4 })
+		end.to limit_allocations(String => {count: 4})
 	end
 	
 	it "should be within specified count range" do
@@ -47,12 +47,18 @@ RSpec.describe "memory context" do
 
 		expect do
 			2.times{String.new}
-		end.to limit_allocations(String => { count: 1..3 })
+		end.to limit_allocations(String => {count: 1..3})
+	end
+	
+	it "should exceed specified size limit", pending: 'it should fail' do
+		expect do
+			"a" * 100_000
+		end.to limit_allocations(size: 100_000)
 	end
 	
 	it "should not exceed specified size limit" do
 		expect do
 			"a" * 100_000
-		end.to limit_allocations(String => { size: 101_000 })
+		end.to limit_allocations(size: 101_000)
 	end
 end
