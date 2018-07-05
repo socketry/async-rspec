@@ -22,23 +22,25 @@ RSpec.describe "memory context" do
 	include_context Async::RSpec::Memory
 	
 	if Async::RSpec::Memory::Trace.supported?
-		# The following fails:
-		it "should exceed specified count limit", pending: 'it should fail' do
-			expect do
-				6.times{String.new}
-			end.to limit_allocations(String => 4)
-		end
 	end
 	
 	it "should not exceed specified count limit" do
 		expect do
 			2.times{String.new}
-		end.to limit_allocations(String => 4)
+		end.to limit_allocations(String => 2)
 		
 		expect do
 			2.times{String.new}
-		end.to limit_allocations(String => {count: 4})
+		end.to limit_allocations(String => {count: 3})
 	end
+	
+	it "should exceed specified count limit" do
+		expect do
+			expect do
+				6.times{String.new}
+			end.to limit_allocations(String => 4)
+		end.to raise_error(RSpec::Expectations::ExpectationNotMetError, /expected at most 4 instances/)
+	end if Async::RSpec::Memory::Trace.supported?
 	
 	it "should be within specified count range" do
 		expect do
@@ -50,15 +52,25 @@ RSpec.describe "memory context" do
 		end.to limit_allocations(String => {count: 1..3})
 	end
 	
-	it "should exceed specified size limit", pending: 'it should fail' do
+	it "should exceed specified count range" do
 		expect do
-			"a" * 100_000
-		end.to limit_allocations(size: 100_000)
-	end
+			expect do
+				6.times{String.new}
+			end.to limit_allocations(String => 1..3)
+		end.to raise_error(RSpec::Expectations::ExpectationNotMetError, /expected within 1..3 instances/)
+	end if Async::RSpec::Memory::Trace.supported?
 	
 	it "should not exceed specified size limit" do
 		expect do
 			"a" * 100_000
 		end.to limit_allocations(size: 101_000)
 	end
+	
+	it "should exceed specified size limit" do
+		expect do
+			expect do
+				"a" * 120_000
+			end.to limit_allocations(size: 100_000)
+		end.to raise_error(RSpec::Expectations::ExpectationNotMetError, /expected at most 100000 bytes/)
+	end if Async::RSpec::Memory::Trace.supported?
 end

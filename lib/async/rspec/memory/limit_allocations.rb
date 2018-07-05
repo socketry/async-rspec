@@ -60,7 +60,7 @@ module Async
 							yield "expected within #{limit}"
 						end
 					when Integer
-						unless value < limit
+						unless value <= limit
 							yield "expected at most #{limit}"
 						end
 					end
