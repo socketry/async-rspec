@@ -74,7 +74,6 @@ module Async
 				end
 				
 				def capture(&block)
-					allocated = nil
 					
 					begin
 						GC.disable
