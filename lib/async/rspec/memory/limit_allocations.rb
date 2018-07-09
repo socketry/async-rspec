@@ -60,16 +60,19 @@ module Async
 							yield "expected within #{limit}"
 						end
 					when Integer
-						unless value <= limit
-							yield "expected at most #{limit}"
+						unless value == limit
+							yield "expected exactly #{limit}"
 						end
 					end
 				end
 				
 				def matches?(given_proc)
-					return true unless trace = Trace.capture(&given_proc)
+					return true unless trace = Trace.capture(@allocations.keys, &given_proc)
 					
-					if total = trace.total
+					if @count or @size
+						# If the spec specifies a total limit, we have a limit which we can enforce which takes all allocations into account:
+						total = trace.total
+						
 						check(total.count, @count) do |expected|
 							@errors << "allocated #{total.count} instances, #{total.size} bytes, #{expected} instances"
 						end if @count
@@ -77,10 +80,15 @@ module Async
 						check(total.size, @size) do |expected|
 							@errors << "allocated #{total.count} instances, #{total.size} bytes, #{expected} bytes"
 						end if @size
+					else
+						# Otherwise unspecified allocations are considered an error:
+						trace.ignored.each do |klass, allocation|
+							@errors << "allocated #{allocation.count} #{klass} instances, #{allocation.size} bytes, but it was not specified"
+						end
 					end
 					
-					@allocations.each do |klass, acceptable|
-						next unless allocation = trace.allocated[klass]
+					trace.allocated.each do |klass, allocation|
+						next unless acceptable = @allocations[klass]
 						
 						check(allocation.count, acceptable[:count]) do |expected|
 							@errors << "allocated #{allocation.count} #{klass} instances, #{allocation.size} bytes, #{expected} instances"
@@ -99,8 +107,8 @@ module Async
 				end
 			end
 			
-			def limit_allocations(allocations)
-				LimitAllocations.new(allocations)
+			def limit_allocations(*args)
+				LimitAllocations.new(*args)
 			end
 		end
 	end

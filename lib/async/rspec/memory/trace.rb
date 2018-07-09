@@ -24,9 +24,17 @@ module Async
 	module RSpec
 		module Memory
 			Allocation = Struct.new(:count, :size) do
+				SLOT_SIZE = 40
+				
 				def << object
 					self.count += 1
-					self.size += ObjectSpace.memsize_of(object)
+					
+					# We don't want to force specs to take the slot size into account.
+					self.size += ObjectSpace.memsize_of(object) - SLOT_SIZE
+				end
+				
+				def self.default_hash
+					Hash.new{|h,k| h[k] = Allocation.new(0, 0)}
 				end
 			end
 			
@@ -36,8 +44,8 @@ module Async
 				end
 				
 				if supported?
-					def self.capture(&block)
-						self.new.tap do |trace|
+					def self.capture(*args, &block)
+						self.new(*args).tap do |trace|
 							trace.capture(&block)
 						end
 					end
@@ -49,15 +57,21 @@ module Async
 					end
 				end
 				
-				def initialize
-					@allocated = Hash.new{|h,k| h[k] = Allocation.new(0, 0)}
-					@retained = Hash.new{|h,k| h[k] = Allocation.new(0, 0)}
+				def initialize(klasses)
+					@klasses = klasses
+					
+					@allocated = Allocation.default_hash
+					@retained = Allocation.default_hash
+					
+					@ignored = Allocation.default_hash
 					
 					@total = Allocation.new(0, 0)
 				end
 				
 				attr :allocated
 				attr :retained
+				
+				attr :ignored
 				
 				attr :total
 				
@@ -71,6 +85,10 @@ module Async
 					end
 					
 					return allocations
+				end
+				
+				def find_base(object)
+					@klasses.find{|klass| object.is_a? klass}
 				end
 				
 				def capture(&block)
@@ -92,13 +110,25 @@ module Async
 					
 					# All allocated objects, including those freed in the last GC:
 					allocated.each do |object|
-						@allocated[object.class] << object
+						if klass = find_base(object)
+							@allocated[klass] << object
+						else
+							# If the user specified classes, but we can't pin this allocation to a specific class, we issue a warning.
+							if @klasses.any?
+								warn "Ignoring allocation of #{object.class} at #{ObjectSpace.allocation_sourcefile(object)}:#{ObjectSpace.allocation_sourceline(object)}"
+							end
+							
+							@ignored[object.class] << object
+						end
+						
 						@total << object
 					end
 					
 					# Retained objects are still alive after a final GC:
 					retained.each do |object|
-						@retained[object.class] << object
+						if klass = find_base(object)
+							@retained[klass] << object
+						end
 					end
 				end
 			end
