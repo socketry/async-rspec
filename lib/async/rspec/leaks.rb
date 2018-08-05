@@ -29,7 +29,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context Leaks do
+		::RSpec.shared_context Leaks do
 			include Leaks
 			
 			let(:before_ios) {current_ios}

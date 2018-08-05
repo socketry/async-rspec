@@ -26,7 +26,7 @@ module Async
 		begin
 			require 'ruby-prof'
 			
-			RSpec.shared_context Profile do
+			::RSpec.shared_context Profile do
 				around(:each) do |example|
 					profile = RubyProf::Profile.new(merge_fibers: true)
 					
@@ -43,7 +43,7 @@ module Async
 				end
 			end
 		rescue LoadError
-			RSpec.shared_context Profile do
+			::RSpec.shared_context Profile do
 				before(:all) do
 					warn "Profiling not enabled/supported."
 				end

@@ -68,7 +68,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context Reactor do
+		::RSpec.shared_context Reactor do
 			include Reactor
 			
 			let(:reactor) {Async::Reactor.new(selector: Async::Debug::Selector.new)}

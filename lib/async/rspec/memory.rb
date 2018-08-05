@@ -22,7 +22,7 @@ require_relative 'memory/limit_allocations'
 
 module Async
 	module RSpec
-		RSpec.shared_context Memory do
+		::RSpec.shared_context Memory do
 			include Memory
 		end
 	end

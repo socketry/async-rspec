@@ -41,7 +41,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context Buffer do
+		::RSpec.shared_context Buffer do
 			let(:buffer) {Buffer.open}
 			after(:each) {buffer.close}
 		end

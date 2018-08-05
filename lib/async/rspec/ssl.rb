@@ -39,7 +39,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context SSL::CertificateAuthority do
+		::RSpec.shared_context SSL::CertificateAuthority do
 			# This key size is generally considered insecure, but it's fine for testing.
 			let(:certificate_authority_key) {OpenSSL::PKey::RSA.new(1024)}
 			let(:certificate_authority_name) {OpenSSL::X509::Name.parse("O=Test/CN=localhost")}
@@ -79,7 +79,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context SSL::ValidCertificate do
+		::RSpec.shared_context SSL::ValidCertificate do
 			include_context SSL::CertificateAuthority
 			
 			# The private key to use on the server side:
@@ -110,7 +110,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context SSL::HostCertificates do
+		::RSpec.shared_context SSL::HostCertificates do
 			include_context SSL::CertificateAuthority
 			
 			let(:keys) do
@@ -173,7 +173,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context SSL::InvalidCertificate do
+		::RSpec.shared_context SSL::InvalidCertificate do
 			include_context SSL::CertificateAuthority
 			
 			# The private key to use on the server side:
@@ -205,7 +205,7 @@ module Async
 			end
 		end
 		
-		RSpec.shared_context SSL::VerifiedContexts do
+		::RSpec.shared_context SSL::VerifiedContexts do
 			let(:server_context) do
 				OpenSSL::SSL::SSLContext.new.tap do |context|
 					context.cert = certificate
