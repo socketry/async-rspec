@@ -4,7 +4,5 @@ source 'https://rubygems.org'
 gemspec
 
 group :test do
-	unless RUBY_PLATFORM =~ /java/
-		gem "ruby-prof"
-	end
+	gem "ruby-prof", platform: :mri
 end
