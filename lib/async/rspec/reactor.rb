@@ -76,7 +76,7 @@ module Async
 			include_context Async::RSpec::Leaks
 			
 			around(:each) do |example|
-				duration = example.metadata.fetch(:timeout, 60)
+				duration = example.metadata.fetch(:timeout, 10)
 				
 				begin
 					run_example(reactor, example, duration)
