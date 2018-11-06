@@ -40,7 +40,10 @@ module Async
 			
 			class Trace
 				def self.supported?
-					ObjectSpace.respond_to? :trace_object_allocations
+					# There are issues on truffleruby-1.0.0rc9
+					return false if RUBY_ENGINE == "truffleruby"
+					
+					ObjectSpace.respond_to?(:trace_object_allocations)
 				end
 				
 				if supported?
@@ -50,7 +53,7 @@ module Async
 						end
 					end
 				else
-					def self.capture(&block)
+					def self.capture(*args, &block)
 						yield
 						
 						return nil
