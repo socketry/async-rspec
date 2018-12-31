@@ -60,13 +60,13 @@ RSpec.describe "memory allocations" do
 	it "limits allocation counts (hash)" do
 		expect do
 			6.times{String.new}
-		end.to limit_allocations(String => { count: 10 }) # 10 strings can be allocated
+		end.to limit_allocations(String => {count: 10}) # 10 strings can be allocated
 	end
 	
 	it "limits allocation size" do
 		expect do
 			6.times{String.new("foo")}
-		end.to limit_allocations(String => { size: 1024 }) # 1 KB of strings can be allocated
+		end.to limit_allocations(String => {size: 1024}) # 1 KB of strings can be allocated
 	end
 end
 ```
@@ -76,26 +76,31 @@ end
 Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks.
 
 ```ruby
-RSpec.describe IO do
+require 'async/io'
+
+RSpec.describe Async::IO do
 	include_context Async::RSpec::Reactor
 	
 	let(:pipe) {IO.pipe}
-	let(:input) {pipe.last}
-	let(:output) {pipe.first}
+	let(:input) {Async::IO::Generic.new(pipe.first)}
+	let(:output) {Async::IO::Generic.new(pipe.last)}
 	
 	it "should send and receive data within the same reactor" do
 		message = nil
 		
-		output_task = reactor.with(output) do |wrapper|
-			message = wrapper.read(1024)
+		output_task = reactor.async do
+			message = input.read(1024)
 		end
 		
-		reactor.with(input) do |wrapper|
-			wrapper.write("Hello World")
+		reactor.async do
+			output.write("Hello World")
 		end
 		
 		output_task.wait
 		expect(message).to be == "Hello World"
+		
+		input.close
+		output.close
 	end
 end
 ```
