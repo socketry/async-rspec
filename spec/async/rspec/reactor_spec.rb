@@ -51,12 +51,14 @@ RSpec.describe "reactor context" do
 			end.wait
 		end
 		
-		it "times out", pending: 'it should fail' do
+		it "times out" do
 			reactor.async do |task|
 				expect{
 					task.sleep(100)
 				}.to raise_error(Async::Stop)
 			end.wait
+			
+			expect(reactor).to be_stopped
 		end
 	end
 end
