@@ -34,7 +34,7 @@ require 'async/rspec'
 
 ### Leaks
 
-Leaking sockets and other kinds of IOs are a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, a `RuntimeError` raises and the spec fails.
+Leaking sockets and other kinds of IOs are a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, a `RuntimeError` is raised and the spec fails.
 
 ```ruby
 RSpec.describe "leaky ios" do
@@ -47,7 +47,7 @@ RSpec.describe "leaky ios" do
 end
 ```
 
-In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible that just writing `IO.pipe` will not leak as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not correctly close IOs, so don't depend on this behaviour.
+In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible that just writing `IO.pipe` will not leak as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not close IOs, so don't depend on this behaviour.
 
 ### Allocations
 
