@@ -23,12 +23,18 @@ And then execute:
 Or install it yourself as:
 
 	$ gem install async-rspec
+	
+Finally, add this require statement to the top of `spec/spec_helper.rb`
+
+```ruby
+require 'async/rspec'
+```
 
 ## Usage
 
 ### Leaks
 
-Leaking sockets and other kinds of IOs is a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, the spec fails.
+Leaking sockets and other kinds of IOs are a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, a `RuntimeError` raises and the spec fails.
 
 ```ruby
 RSpec.describe "leaky ios" do
@@ -41,7 +47,7 @@ RSpec.describe "leaky ios" do
 end
 ```
 
-In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible to just writing `IO.pipe` will not leak, as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not correctly close IOs, so don't depend on this behaviour.
+In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible that just writing `IO.pipe` will not leak as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not correctly close IOs, so don't depend on this behaviour.
 
 ### Allocations
 
@@ -73,7 +79,7 @@ end
 
 ### Reactor
 
-Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks.
+Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks. If your spec fails to run in less than 10 seconds, an `Async::TimeoutError` raises to prevent your test suite from hanging.
 
 ```ruby
 require 'async/io'
