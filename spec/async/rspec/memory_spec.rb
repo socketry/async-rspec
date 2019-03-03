@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'async/rspec/memory'
+
 RSpec.describe Async::RSpec::Memory do
 	include_context Async::RSpec::Memory
 	

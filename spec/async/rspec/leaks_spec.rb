@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'async/rspec/leaks'
+
 RSpec.describe "leaks context" do
 	include_context Async::RSpec::Leaks
 	
