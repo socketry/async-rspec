@@ -57,7 +57,7 @@ module Async
 						if result.is_a? Exception
 							reactor.stop
 						else
-							spec_task.children.each(&:wait)
+							spec_task.children&.each(&:wait)
 						end
 					end.wait
 					
