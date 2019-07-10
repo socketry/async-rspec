@@ -17,6 +17,8 @@ Gem::Specification.new do |spec|
 	spec.require_paths = ["lib"]
 	
 	spec.add_dependency "rspec", "~> 3.0"
+	spec.add_dependency "rspec-memory", "~> 1.0"
+	spec.add_dependency "rspec-files", "~> 1.0"
 	
 	# Since we test the shared contexts, we need some bits of async:
 	spec.add_development_dependency "async", "~> 1.8"

@@ -18,31 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'rspec/files'
+
 module Async
 	module RSpec
-		module Leaks
-			def current_ios(gc: GC.start)
-				all_ios = ObjectSpace.each_object(::IO).to_a.sort_by(&:object_id)
-				
-				# We are not interested in ios that have been closed already:
-				return all_ios.reject{|io| io.closed?}
-			end
-		end
-		
-		::RSpec.shared_context Leaks do
-			include Leaks
-			
-			let(:before_ios) {current_ios}
-			let(:after_ios) {current_ios}
-			
-			# We use around(:each) because it's the highest priority.
-			around(:each) do |example|
-				before_ios
-				
-				example.run.tap do
-					expect(after_ios).to be == before_ios
-				end
-			end
-		end
+		Leaks = ::RSpec::Files::Leaks
 	end
 end

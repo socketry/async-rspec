@@ -18,12 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require_relative 'memory/limit_allocations'
+require 'rspec/memory'
 
 module Async
 	module RSpec
-		::RSpec.shared_context Memory do
-			include Memory
-		end
+		Memory = ::RSpec::Memory
 	end
 end
