@@ -54,11 +54,11 @@ RSpec.describe "reactor context" do
 		end
 		
 		it "times out" do
-			reactor.async do |task|
-				expect{
+			expect do
+				reactor.async do |task|
 					task.sleep(100)
-				}.to raise_error(Async::Stop)
-			end.wait
+				end.wait
+			end.to raise_error(Async::Stop)
 			
 			expect(reactor).to be_stopped
 		end
