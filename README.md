@@ -32,52 +32,7 @@ require 'async/rspec'
 
 ## Usage
 
-### Leaks
-
-Leaking sockets and other kinds of IOs are a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, a `RuntimeError` is raised and the spec fails.
-
-```ruby
-RSpec.describe "leaky ios" do
-	include_context Async::RSpec::Leaks
-	
-	# The following fails:
-	it "leaks io" do
-		@input, @output = IO.pipe
-	end
-end
-```
-
-In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible that just writing `IO.pipe` will not leak as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not close IOs, so don't depend on this behaviour.
-
-### Allocations
-
-Allocating large amounts of objects can lead to memery problems. `Async::RSpec::Memory` adds a `limit_allocations` matcher, which tracks the number of allocations and memory size for each object type and allows you to specify expected limits.
-
-```ruby
-RSpec.describe "memory allocations" do
-	include_context Async::RSpec::Memory
-	
-	it "limits allocation counts" do
-		expect do
-			6.times{String.new}
-		end.to limit_allocations(String => 10) # 10 strings can be allocated
-	end
-	
-	it "limits allocation counts (hash)" do
-		expect do
-			6.times{String.new}
-		end.to limit_allocations(String => {count: 10}) # 10 strings can be allocated
-	end
-	
-	it "limits allocation size" do
-		expect do
-			6.times{String.new("foo")}
-		end.to limit_allocations(String => {size: 1024}) # 1 KB of strings can be allocated
-	end
-end
-```
-
-### Reactor
+### Async Reactor
 
 Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks. If your spec fails to run in less than 10 seconds, an `Async::TimeoutError` raises to prevent your test suite from hanging.
 
@@ -110,6 +65,37 @@ RSpec.describe Async::IO do
 	end
 end
 ```
+
+### Changing Timeout
+
+You can change the timeout by specifying it as an option:
+
+```ruby
+RSpec.describe MySlowThing, timeout: 60 do
+	# ...
+end
+```
+
+### File Descriptor Leaks
+
+Leaking sockets and other kinds of IOs are a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, a `RuntimeError` is raised and the spec fails.
+
+```ruby
+RSpec.describe "leaky ios" do
+	include_context Async::RSpec::Leaks
+	
+	# The following fails:
+	it "leaks io" do
+		@input, @output = IO.pipe
+	end
+end
+```
+
+In some cases, the Ruby garbage collector will close IOs. In the above case, it's possible that just writing `IO.pipe` will not leak as Ruby will garbage collect the resulting IOs immediately. It's still incorrect to not close IOs, so don't depend on this behaviour.
+
+### Allocations
+
+This functionality was moved to [`rspec-memory`](https://github.com/socketry/rspec-memory).
 
 ## Contributing
 
