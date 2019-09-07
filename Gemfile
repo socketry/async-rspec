@@ -4,5 +4,5 @@ source 'https://rubygems.org'
 gemspec
 
 group :test do
-	gem "ruby-prof", platform: :mri
+	gem "ruby-prof", "0.18.0", platform: :mri
 end
