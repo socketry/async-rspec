@@ -40,29 +40,29 @@ Many specs need to run within a reactor. A shared context is provided which incl
 require 'async/io'
 
 RSpec.describe Async::IO do
-	include_context Async::RSpec::Reactor
+  include_context Async::RSpec::Reactor
 	
-	let(:pipe) {IO.pipe}
-	let(:input) {Async::IO::Generic.new(pipe.first)}
-	let(:output) {Async::IO::Generic.new(pipe.last)}
-	
-	it "should send and receive data within the same reactor" do
-		message = nil
+  let(:pipe) {IO.pipe}
+  let(:input) {Async::IO::Generic.new(pipe.first)}
+  let(:output) {Async::IO::Generic.new(pipe.last)}
+  
+  it "should send and receive data within the same reactor" do
+    message = nil
 		
-		output_task = reactor.async do
-			message = input.read(1024)
-		end
+    output_task = reactor.async do
+      message = input.read(1024)
+    end
 		
-		reactor.async do
-			output.write("Hello World")
-		end
+    reactor.async do
+      output.write("Hello World")
+    end
 		
-		output_task.wait
-		expect(message).to be == "Hello World"
+    output_task.wait
+    expect(message).to be == "Hello World"
 		
-		input.close
-		output.close
-	end
+    input.close
+    output.close
+  end
 end
 ```
 
@@ -72,7 +72,7 @@ You can change the timeout by specifying it as an option:
 
 ```ruby
 RSpec.describe MySlowThing, timeout: 60 do
-	# ...
+  # ...
 end
 ```
 
@@ -82,12 +82,12 @@ Leaking sockets and other kinds of IOs are a problem for long running services. 
 
 ```ruby
 RSpec.describe "leaky ios" do
-	include_context Async::RSpec::Leaks
+  include_context Async::RSpec::Leaks
 	
-	# The following fails:
-	it "leaks io" do
-		@input, @output = IO.pipe
-	end
+  # The following fails:
+  it "leaks io" do
+    @input, @output = IO.pipe
+  end
 end
 ```
 
