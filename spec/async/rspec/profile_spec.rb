@@ -18,12 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'async'
 require 'async/rspec/profile'
 
-RSpec.describe "leaks context" do
+RSpec.describe Async::RSpec::Profile do
 	include_context Async::RSpec::Profile
 	
 	it "profiles the function" do
-		sleep 0
+		Async do |parent|
+			Async do |child|
+				child.sleep(1)
+			end.wait
+		end
 	end
 end
