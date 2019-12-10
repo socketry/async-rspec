@@ -20,49 +20,58 @@
 
 require_relative 'leaks'
 
+require 'kernel/async'
+
 require 'async/reactor'
 require 'async/debug/selector'
 
 module Async
 	module RSpec
 		module Reactor
-			def run_example(reactor, example, duration)
+			def notify_failure(exception = $!)
+				::RSpec::Support.notify_failure(exception)
+			end
+			
+			def run_in_reactor(reactor, duration = nil)
 				result = nil
+				
+				timer_task = nil
+				
+				if duration
+					timer_task = reactor.async do |task|
+						# Wait for the timeout, at any point this task might be cancelled if the user code completes:
+						task.annotate("timer task duration=#{duration}")
+						task.sleep(duration)
+						
+						# The timeout expired, so generate an error:
+						buffer = StringIO.new
+						reactor.print_hierarchy(buffer)
+						
+						# Raise an error so it is logged:
+						raise TimeoutError, "run time exceeded duration #{duration}s:\r\n#{buffer.string}"
+					end
+				end
 				
 				reactor.run do |task|
 					task.annotate(self.class)
 					
-					reactor = task.reactor
-					timer = nil
-					
-					if duration
-						timer = reactor.async do |task|
-							task.annotate("timer task duration=#{duration}")
-							task.sleep(duration)
-							
-							buffer = StringIO.new
-							reactor.print_hierarchy(buffer)
-							
-							reactor.stop
-							
-							raise TimeoutError, "run time exceeded duration #{duration}s:\r\n#{buffer.string}"
-						end
+					spec_task = task.async do |spec_task|
+						spec_task.annotate("running example")
+						
+						result = yield
+						
+						timer_task&.stop
+						
+						raise Async::Stop
 					end
 					
-					task.async do |spec_task|
-						spec_task.annotate("example runner")
-						
-						result = example.run
-						
-						if result.is_a? Exception
-							reactor.stop
-						else
-							spec_task.children&.each(&:wait)
-						end
-					end.wait
-					
-					timer.stop if timer
-				end
+					begin
+						timer_task&.wait
+						spec_task.wait
+					ensure
+						spec_task.stop
+					end
+				end.wait
 				
 				return result
 			end
@@ -79,7 +88,9 @@ module Async
 				duration = example.metadata.fetch(:timeout, 10)
 				
 				begin
-					run_example(reactor, example, duration)
+					run_in_reactor(reactor, duration) do
+						example.run
+					end
 				ensure
 					reactor.close
 				end

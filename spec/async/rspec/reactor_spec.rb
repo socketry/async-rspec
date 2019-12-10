@@ -20,15 +20,39 @@
 
 require 'async/rspec/reactor'
 
-RSpec.describe "reactor context" do
-	include_context Async::RSpec::Reactor
-	
-	# The following fails:
-	it "has reactor" do
-		expect(reactor).to be_kind_of Async::Reactor
+RSpec.describe Async::RSpec::Reactor do
+	context "with shared context", timeout: 1 do
+		include_context Async::RSpec::Reactor
+		
+		# The following fails:
+		it "has reactor" do
+			expect(reactor).to be_kind_of Async::Reactor
+		end
+		
+		it "doesn't time out" do
+			reactor.async do |task|
+				expect do
+					task.sleep(0.1)
+				end.to_not raise_error
+			end.wait
+		end
+		
+		# it "times out" do
+		# 	reactor.async do |task|
+		# 		task.sleep(2)
+		# 	end.wait
+		# end
+		# 
+		# it "propagates errors" do
+		# 	reactor.async do |task|
+		# 		raise "Boom!"
+		# 	end.wait
+		# end
 	end
 	
 	context "debug selector" do
+		include_context Async::RSpec::Reactor
+		
 		it "should fail if registering the same io twice" do
 			input, output = IO.pipe
 			
@@ -44,23 +68,33 @@ RSpec.describe "reactor context" do
 		end
 	end
 	
-	context "with short timeout", timeout: 1 do
-		it "doesn't time out" do
-			reactor.async do |task|
-				expect{
-					task.sleep(0.1)
-				}.to_not raise_error
-			end.wait
-		end
+	context "timeouts", timeout: 1 do
+		include Async::RSpec::Reactor
+		
+		let(:reactor) {Async::Reactor.new}
 		
 		it "times out" do
 			expect do
-				reactor.async do |task|
-					task.sleep(100)
-				end.wait
-			end.to raise_error(Async::Stop)
-			
-			expect(reactor).to be_stopped
+				run_in_reactor(reactor, 0.05) do
+					Async::Task.current.sleep(0.1)
+				end
+			end.to raise_error(Async::TimeoutError)
 		end
+		
+		it "doesn't time out" do
+			expect do
+				run_in_reactor(reactor, 0.05) do
+					Async::Task.current.sleep(0.01)
+				end
+			end.to_not raise_error
+		end
+		
+		# it "propagates errors" do
+		# 	expect do
+		# 		run_in_reactor(reactor, 0.05) do
+		# 			raise "Boom!"
+		# 		end
+		# 	end.to raise_error("Boom!")
+		# end
 	end
 end
