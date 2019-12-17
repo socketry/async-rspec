@@ -4,6 +4,7 @@ require_relative 'lib/async/rspec/version'
 Gem::Specification.new do |spec|
 	spec.name          = "async-rspec"
 	spec.version       = Async::RSpec::VERSION
+	spec.licenses      = ["MIT"]
 	spec.authors       = ["Samuel Williams"]
 	spec.email         = ["samuel.williams@oriontransfer.co.nz"]
 
