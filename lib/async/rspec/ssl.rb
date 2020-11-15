@@ -42,7 +42,7 @@ module Async
 		::RSpec.shared_context SSL::CertificateAuthority do
 			# This key size is generally considered insecure, but it's fine for testing.
 			let(:certificate_authority_key) {OpenSSL::PKey::RSA.new(1024)}
-			let(:certificate_authority_name) {OpenSSL::X509::Name.parse("O=Test/CN=localhost")}
+			let(:certificate_authority_name) {OpenSSL::X509::Name.parse("O=TestCA/CN=localhost")}
 
 			# The certificate authority is used for signing and validating the certificate which is used for communciation:
 			let(:certificate_authority) do
