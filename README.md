@@ -1,32 +1,18 @@
 # Async::RSpec
 
-Provides useful `RSpec.shared_context`s for testing code that builds on top of [async].
+Provides useful `RSpec.shared_context`s for testing code that builds on top of [async](https://github.com/socketry/async).
 
-[async]: https://github.com/socketry/async
-
-[![Build Status](https://travis-ci.com/socketry/async-rspec.svg?branch=master)](https://travis-ci.com/socketry/async-rspec)
-[![Code Climate](https://codeclimate.com/github/socketry/async-rspec.svg)](https://codeclimate.com/github/socketry/async-rspec)
-[![Coverage Status](https://coveralls.io/repos/socketry/async-rspec/badge.svg)](https://coveralls.io/r/socketry/async-rspec)
+[![Development Status](https://github.com/socketry/async-rspec/workflows/Development/badge.svg)](https://github.com/socketry/async-rspec/actions?workflow=Development)
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'async-rspec'
+``` shell
+$ bundle add async-rspec
 ```
 
-And then execute:
+Then add this require statement to the top of `spec/spec_helper.rb`
 
-	$ bundle
-
-Or install it yourself as:
-
-	$ gem install async-rspec
-	
-Finally, add this require statement to the top of `spec/spec_helper.rb`
-
-```ruby
+``` ruby
 require 'async/rspec'
 ```
 
@@ -36,33 +22,33 @@ require 'async/rspec'
 
 Many specs need to run within a reactor. A shared context is provided which includes all the relevant bits, including the above leaks checks. If your spec fails to run in less than 10 seconds, an `Async::TimeoutError` raises to prevent your test suite from hanging.
 
-```ruby
+``` ruby
 require 'async/io'
 
 RSpec.describe Async::IO do
-  include_context Async::RSpec::Reactor
+	include_context Async::RSpec::Reactor
 	
-  let(:pipe) {IO.pipe}
-  let(:input) {Async::IO::Generic.new(pipe.first)}
-  let(:output) {Async::IO::Generic.new(pipe.last)}
-  
-  it "should send and receive data within the same reactor" do
-    message = nil
+	let(:pipe) {IO.pipe}
+	let(:input) {Async::IO::Generic.new(pipe.first)}
+	let(:output) {Async::IO::Generic.new(pipe.last)}
+	
+	it "should send and receive data within the same reactor" do
+		message = nil
 		
-    output_task = reactor.async do
-      message = input.read(1024)
-    end
+		output_task = reactor.async do
+			message = input.read(1024)
+		end
 		
-    reactor.async do
-      output.write("Hello World")
-    end
+		reactor.async do
+			output.write("Hello World")
+		end
 		
-    output_task.wait
-    expect(message).to be == "Hello World"
+		output_task.wait
+		expect(message).to be == "Hello World"
 		
-    input.close
-    output.close
-  end
+		input.close
+		output.close
+	end
 end
 ```
 
@@ -70,9 +56,9 @@ end
 
 You can change the timeout by specifying it as an option:
 
-```ruby
+``` ruby
 RSpec.describe MySlowThing, timeout: 60 do
-  # ...
+	# ...
 end
 ```
 
@@ -80,14 +66,14 @@ end
 
 Leaking sockets and other kinds of IOs are a problem for long running services. `Async::RSpec::Leaks` tracks all open sockets both before and after the spec. If any are left open, a `RuntimeError` is raised and the spec fails.
 
-```ruby
+``` ruby
 RSpec.describe "leaky ios" do
-  include_context Async::RSpec::Leaks
+	include_context Async::RSpec::Leaks
 	
-  # The following fails:
-  it "leaks io" do
-    @input, @output = IO.pipe
-  end
+	# The following fails:
+	it "leaks io" do
+		@input, @output = IO.pipe
+	end
 end
 ```
 
@@ -99,11 +85,11 @@ This functionality was moved to [`rspec-memory`](https://github.com/socketry/rsp
 
 ## Contributing
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+1.  Fork it
+2.  Create your feature branch (`git checkout -b my-new-feature`)
+3.  Commit your changes (`git commit -am 'Add some feature'`)
+4.  Push to the branch (`git push origin my-new-feature`)
+5.  Create new Pull Request
 
 ## License
 

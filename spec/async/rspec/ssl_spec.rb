@@ -36,7 +36,7 @@ RSpec.describe Async::RSpec::SSL do
 			expect(certificate_store.verify(certificate)).to be_truthy
 		end
 	end
-
+	
 	context Async::RSpec::SSL::InvalidCertificate do
 		include_context Async::RSpec::SSL::InvalidCertificate
 		
