@@ -41,7 +41,7 @@ module Async
 		
 		::RSpec.shared_context SSL::CertificateAuthority do
 			# This key size is generally considered insecure, but it's fine for testing.
-			let(:certificate_authority_key) {OpenSSL::PKey::RSA.new(1024)}
+			let(:certificate_authority_key) {OpenSSL::PKey::RSA.new(2048)}
 			let(:certificate_authority_name) {OpenSSL::X509::Name.parse("O=TestCA/CN=localhost")}
 
 			# The certificate authority is used for signing and validating the certificate which is used for communciation:
@@ -83,7 +83,7 @@ module Async
 			include_context SSL::CertificateAuthority
 			
 			# The private key to use on the server side:
-			let(:key) {OpenSSL::PKey::RSA.new(1024)}
+			let(:key) {OpenSSL::PKey::RSA.new(2048)}
 			let(:certificate_name) {OpenSSL::X509::Name.parse("O=Test/CN=localhost")}
 
 			# The certificate used for actual communication:
@@ -115,7 +115,7 @@ module Async
 			
 			let(:keys) do
 				Hash[
-					hosts.collect{|name| [name, OpenSSL::PKey::RSA.new(1024)]}
+					hosts.collect{|name| [name, OpenSSL::PKey::RSA.new(2048)]}
 				]
 			end
 			
@@ -177,8 +177,8 @@ module Async
 			include_context SSL::CertificateAuthority
 			
 			# The private key to use on the server side:
-			let(:key) {OpenSSL::PKey::RSA.new(1024)}
-			let(:invalid_key) {OpenSSL::PKey::RSA.new(1024)}
+			let(:key) {OpenSSL::PKey::RSA.new(2048)}
+			let(:invalid_key) {OpenSSL::PKey::RSA.new(2048)}
 			let(:certificate_name) {OpenSSL::X509::Name.parse("O=Test/CN=localhost")}
 
 			# The certificate used for actual communication:
