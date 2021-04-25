@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require 'async/rspec/reactor'
+require 'async/io/generic'
 
 RSpec.describe Async::RSpec::Reactor do
 	context "with shared context", timeout: 1 do
@@ -54,17 +55,19 @@ RSpec.describe Async::RSpec::Reactor do
 		include_context Async::RSpec::Reactor
 		
 		it "should fail if registering the same io twice" do
-			input, output = IO.pipe
+			input, output = IO.pipe.map{|io| Async::IO::Generic.new(io)}
 			
-			monitor = reactor.register(input, :r)
+			reactor.async do
+				input.read
+			end
 			
 			expect do
-				reactor.register(input, :r)
-			end.to raise_error(RuntimeError, /already registered/)
-			
-			monitor.close
-			input.close
-			output.close
+				input.read
+			end.to raise_error(/already registered|already waiting/)
+		
+		ensure
+			input&.close
+			output&.close
 		end
 	end
 	

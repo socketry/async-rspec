@@ -21,9 +21,7 @@
 require_relative 'leaks'
 
 require 'kernel/async'
-
 require 'async/reactor'
-require 'async/debug/selector'
 
 module Async
 	module RSpec
@@ -79,8 +77,7 @@ module Async
 		
 		::RSpec.shared_context Reactor do
 			include Reactor
-			
-			let(:reactor) {Async::Reactor.new(selector: Async::Debug::Selector.new)}
+			let(:reactor) {Async::Reactor.new}
 			
 			include_context Async::RSpec::Leaks
 			
