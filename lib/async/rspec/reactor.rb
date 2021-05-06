@@ -21,9 +21,7 @@
 require_relative 'leaks'
 
 require 'kernel/async'
-
 require 'async/reactor'
-require 'async/debug/selector'
 
 module Async
 	module RSpec
@@ -80,7 +78,8 @@ module Async
 		::RSpec.shared_context Reactor do
 			include Reactor
 			
-			let(:reactor) {Async::Reactor.new(selector: Async::Debug::Selector.new)}
+			let(:scheduler) {Async::Scheduler.new}
+			let(:reactor) {Async::Reactor.new(scheduler)}
 			
 			include_context Async::RSpec::Leaks
 			
@@ -88,11 +87,13 @@ module Async
 				duration = example.metadata.fetch(:timeout, 10)
 				
 				begin
+					scheduler.set!
+					
 					run_in_reactor(reactor, duration) do
 						example.run
 					end
 				ensure
-					reactor.close
+					scheduler.clear!
 				end
 			end
 		end
