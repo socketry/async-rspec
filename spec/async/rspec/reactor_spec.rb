@@ -51,26 +51,6 @@ RSpec.describe Async::RSpec::Reactor do
 		# end
 	end
 	
-	context "debug selector" do
-		include_context Async::RSpec::Reactor
-		
-		it "should fail if registering the same io twice" do
-			input, output = IO.pipe.map{|io| Async::IO::Generic.new(io)}
-			
-			reactor.async do
-				input.read
-			end
-			
-			expect do
-				input.read
-			end.to raise_error(/already registered|already waiting/)
-		
-		ensure
-			input&.close
-			output&.close
-		end
-	end
-	
 	context "timeouts", timeout: 1 do
 		include Async::RSpec::Reactor
 		
