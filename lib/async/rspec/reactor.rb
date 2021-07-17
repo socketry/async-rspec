@@ -20,8 +20,10 @@
 
 require_relative 'leaks'
 
+require 'kernel/sync'
 require 'kernel/async'
 require 'async/reactor'
+require 'async/task'
 
 module Async
 	module RSpec
@@ -32,13 +34,12 @@ module Async
 			
 			def run_in_reactor(reactor, duration = nil)
 				result = nil
-				
 				timer_task = nil
 				
 				if duration
 					timer_task = reactor.async do |task|
 						# Wait for the timeout, at any point this task might be cancelled if the user code completes:
-						task.annotate("timer task duration=#{duration}")
+						task.annotate("Timer task duration=#{duration}.")
 						task.sleep(duration)
 						
 						# The timeout expired, so generate an error:
@@ -46,30 +47,28 @@ module Async
 						reactor.print_hierarchy(buffer)
 						
 						# Raise an error so it is logged:
-						raise TimeoutError, "run time exceeded duration #{duration}s:\r\n#{buffer.string}"
+						raise TimeoutError, "Run time exceeded duration #{duration}s:\n#{buffer.string}"
 					end
 				end
 				
-				reactor.run do |task|
-					task.annotate(self.class)
+				spec_task = reactor.async do |spec_task|
+					spec_task.annotate("running example")
 					
-					spec_task = task.async do |spec_task|
-						spec_task.annotate("running example")
-						
-						result = yield
-						
-						timer_task&.stop
-						
-						raise Async::Stop
-					end
+					result = yield(spec_task)
 					
-					begin
-						timer_task&.wait
-						spec_task.wait
-					ensure
-						spec_task.stop
-					end
-				end.wait
+					# We are finished, so stop the timer task if it was started:
+					timer_task&.stop
+					
+					# Now stop the entire reactor:
+					raise Async::Stop
+				end
+				
+				begin
+					timer_task&.wait
+					spec_task.wait
+				ensure
+					spec_task.stop
+				end
 				
 				return result
 			end
@@ -77,7 +76,7 @@ module Async
 		
 		::RSpec.shared_context Reactor do
 			include Reactor
-			let(:reactor) {Async::Reactor.new}
+			let(:reactor) {@reactor}
 			
 			include_context Async::RSpec::Leaks
 			
@@ -85,11 +84,17 @@ module Async
 				duration = example.metadata.fetch(:timeout, 10)
 				
 				begin
-					run_in_reactor(reactor, duration) do
-						example.run
+					Sync do |task|
+						@reactor = task.reactor
+						
+						task.annotate(self.class)
+						
+						run_in_reactor(@reactor, duration) do
+							example.run
+						end
+					ensure
+						@reactor = nil
 					end
-				ensure
-					reactor.close
 				end
 			end
 		end

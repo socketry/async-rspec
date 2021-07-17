@@ -74,20 +74,22 @@ RSpec.describe Async::RSpec::Reactor do
 	context "timeouts", timeout: 1 do
 		include Async::RSpec::Reactor
 		
-		let(:reactor) {Async::Reactor.new}
-		
 		it "times out" do
 			expect do
-				run_in_reactor(reactor, 0.05) do
-					Async::Task.current.sleep(0.1)
+				Sync do |task|
+					run_in_reactor(task.reactor, 0.05) do |spec_task|
+						spec_task.sleep(0.1)
+					end
 				end
 			end.to raise_error(Async::TimeoutError)
 		end
 		
 		it "doesn't time out" do
 			expect do
-				run_in_reactor(reactor, 0.05) do
-					Async::Task.current.sleep(0.01)
+				Sync do |task|
+					run_in_reactor(task.reactor, 0.05) do |spec_task|
+						spec_task.sleep(0.01)
+					end
 				end
 			end.to_not raise_error
 		end
