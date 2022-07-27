@@ -4,4 +4,4 @@ source 'https://rubygems.org'
 
 gemspec path: "../"
 
-gem 'async', git: "https://github.com/socketry/async"
+gem 'async', '~> 2.0'

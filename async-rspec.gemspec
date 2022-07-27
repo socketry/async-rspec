@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 require_relative "lib/async/rspec/version"
 
@@ -6,7 +7,7 @@ Gem::Specification.new do |spec|
 	spec.version = Async::RSpec::VERSION
 	
 	spec.summary = "Helpers for writing specs against the async gem."
-	spec.authors = ["Samuel Williams"]
+	spec.authors = ["Samuel Williams", "Janko Marohnić", "Olle Jonsson", "Cyril Roelandt", "Jeremy Jung"]
 	spec.license = "MIT"
 	
 	spec.homepage = "https://github.com/socketry/async-rspec"

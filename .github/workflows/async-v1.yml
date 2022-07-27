@@ -12,7 +12,8 @@ jobs:
           - ubuntu
         
         ruby:
-          - 2.7
+          - "2.7"
+          - "3.1"
     
     env:
       BUNDLE_GEMFILE: gems/async-v1.rb
