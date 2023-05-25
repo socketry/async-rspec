@@ -78,6 +78,7 @@ module Async
 			include Reactor
 			let(:reactor) {@reactor}
 			
+			rspec_context = Thread.current[:__rspec]
 			include_context Async::RSpec::Leaks
 			
 			around(:each) do |example|
@@ -90,6 +91,7 @@ module Async
 						task.annotate(self.class)
 						
 						run_in_reactor(@reactor, duration) do
+							Thread.current[:__rspec] = rspec_context
 							example.run
 						end
 					ensure
