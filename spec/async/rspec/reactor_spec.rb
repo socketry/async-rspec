@@ -82,4 +82,13 @@ RSpec.describe Async::RSpec::Reactor do
 		# 	end.to raise_error("Boom!")
 		# end
 	end
+
+	context "rspec metadata", timeout: 1 do
+		include_context Async::RSpec::Reactor	
+
+		it "should have access to example metadata" do
+			expect(RSpec.current_example).not_to be_nil
+			expect(RSpec.current_example.metadata[:described_class]).to eq(Async::RSpec::Reactor)
+		end
+	end
 end
