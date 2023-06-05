@@ -19,6 +19,4 @@ end
 
 group :test do
 	gem "bake-test"
-	
-	gem "ruby-prof", git: "https://github.com/ruby-prof/ruby-prof"
 end
