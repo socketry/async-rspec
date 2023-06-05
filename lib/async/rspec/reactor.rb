@@ -78,11 +78,13 @@ module Async
 			include Reactor
 			let(:reactor) {@reactor}
 			
+			# This is fiber local:
 			rspec_context = Thread.current[:__rspec]
+			
 			include_context Async::RSpec::Leaks
 			
 			around(:each) do |example|
-				duration = example.metadata.fetch(:timeout, 10)
+				duration = example.metadata.fetch(:timeout, 60)
 				
 				begin
 					Sync do |task|

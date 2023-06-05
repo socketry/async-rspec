@@ -7,12 +7,15 @@ Gem::Specification.new do |spec|
 	spec.version = Async::RSpec::VERSION
 	
 	spec.summary = "Helpers for writing specs against the async gem."
-	spec.authors = ["Samuel Williams", "Janko Marohnić", "Olle Jonsson", "Cyril Roelandt", "Jeremy Jung"]
+	spec.authors = ["Samuel Williams", "Janko Marohnić", "Olle Jonsson", "Cyril Roelandt", "Jeremy Jung", "Robin Goos"]
 	spec.license = "MIT"
+	
+	spec.cert_chain  = ['release.cert']
+	spec.signing_key = File.expand_path('~/.gem/release.pem')
 	
 	spec.homepage = "https://github.com/socketry/async-rspec"
 	
-	spec.files = Dir.glob('{lib}/**/*', File::FNM_DOTMATCH, base: __dir__)
+	spec.files = Dir.glob(['{lib}/**/*', '*.md'], File::FNM_DOTMATCH, base: __dir__)
 	
 	spec.add_dependency "rspec", "~> 3.0"
 	spec.add_dependency "rspec-files", "~> 1.0"
