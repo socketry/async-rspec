@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Released under the MIT License.
-# Copyright, 2017-2021, by Samuel Williams.
+# Copyright, 2017-2023, by Samuel Williams.
 # Copyright, 2023, by Robin Goos.
 
 require 'async/rspec/reactor'

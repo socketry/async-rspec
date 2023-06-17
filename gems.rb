@@ -9,8 +9,6 @@ gemspec
 
 # gem "async", path: "../async"
 
-gem "rugged", "= 1.4.4"
-
 group :maintenance, optional: true do
 	gem "bake-modernize"
 	gem "bake-gem"
