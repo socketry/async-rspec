@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
 	spec.add_dependency "rspec-memory", "~> 1.0"
 	
 	spec.add_development_dependency "async"
-	spec.add_development_dependency "async-io"
 	spec.add_development_dependency "bundler"
 	spec.add_development_dependency "covered"
 end

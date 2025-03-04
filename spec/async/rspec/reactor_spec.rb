@@ -5,7 +5,6 @@
 # Copyright, 2023, by Robin Goos.
 
 require 'async/rspec/reactor'
-require 'async/io/generic'
 
 RSpec.describe Async::RSpec::Reactor do
 	context "with shared context", timeout: 1 do
